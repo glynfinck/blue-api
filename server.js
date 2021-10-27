@@ -1,7 +1,6 @@
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 
-
 // getAuth()
 //   .verifyIdToken(idToken)
 //   .then((decodedToken) => {
@@ -18,7 +17,7 @@ const mongoose = require('mongoose');
 //   process.exit(1);
 // });
 
-dotenv.config({ path: './config.env' });
+dotenv.config({ path: './private/config.env' });
 const app = require('./app');
 
 const DB = process.env.DATABASE.replace(

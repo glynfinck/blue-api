@@ -12,7 +12,7 @@ const {
   signInWithEmailAndPassword,
 } = require('firebase/auth');
 
-const serviceAccount = require('../firebase-service-account.json');
+const serviceAccount = require('../private/firebase-service-account.json');
 
 const firebaseClient = client.initializeApp({
   apiKey: process.env.FIREBASE_API_KEY,
@@ -69,7 +69,7 @@ exports.signIn = catchAsync(async (req, res, next) => {
   );
   const { user } = firebaseResponse;
 
-  console.log(user);
+  //console.log(user);
 
   res.status(201).json({
     status: 'success',
