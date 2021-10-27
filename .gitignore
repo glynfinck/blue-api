@@ -1,5 +1,5 @@
+# ignore node.js module files
 node_modules
 
+# ignore private files
 private
-
-.gitignore
