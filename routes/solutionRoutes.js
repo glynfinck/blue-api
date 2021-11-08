@@ -2,29 +2,37 @@ const express = require('express');
 const solutionController = require('../controllers/solutionController');
 const authController = require('../controllers/authController');
 
-const router = express.Router();
+const adminRouter = express.Router({
+  mergeParams: true,
+});
 
-router
-  .route('/')
-  .get(authController.protect, solutionController.getAllSolutions)
-  .post(
-    authController.protect,
-    authController.restrictTo('user'),
-    solutionController.createSolution
-  );
+adminRouter.use(authController.protect);
+adminRouter.use(authController.restrictTo('admin'));
 
-router
+adminRouter.route('/').get(solutionController.getAllSolutions);
+
+adminRouter
   .route('/:id')
-  .get(authController.protect, solutionController.getSolution)
-  .patch(
-    authController.protect,
-    authController.restrictTo('user'),
-    solutionController.updateSolution
-  )
-  .delete(
-    authController.protect,
-    authController.restrictTo('user'),
-    solutionController.deleteSolution
-  );
+  .get(solutionController.getSolution)
+  .delete(solutionController.deleteSolution);
 
-module.exports = router;
+exports.adminSolutionRouter = adminRouter;
+
+const userRouter = express.Router({
+  mergeParams: true,
+});
+
+userRouter.use(authController.protect);
+userRouter.use(authController.restrictTo('user'));
+
+userRouter
+  .route('/')
+  .get(solutionController.getAllMySolutions)
+  .post(solutionController.createMySolution);
+
+userRouter
+  .route('/:id')
+  .get(solutionController.getMySolution)
+  .patch(solutionController.updateMySolution);
+
+exports.userSolutionRouter = userRouter;

@@ -1,9 +1,20 @@
 const factory = require('./handlerFactory');
 const Edge = require('../models/edgeModel');
+const Graph = require('../models/graphModel');
 
-exports.getAllEdges = factory.getAll(Edge, { graph: 'graphId' });
-exports.createEdge = factory.createOne(Edge);
+// Admin Controller
+exports.getAllEdges = factory.getAll(Edge, {
+  nestedRoutes: { graph: 'graphId' }
+});
 
 exports.getEdge = factory.getOne(Edge);
-exports.updateEdge = factory.updateOne(Edge);
 exports.deleteEdge = factory.deleteOne(Edge);
+
+// User Controller
+exports.getAllMyEdges = factory.getAllMy(Edge, {
+  nestedRoutes: { graph: 'graphId' }
+});
+exports.createMyEdge = factory.createMyParentsOne(Edge, Graph, 'graph');
+
+exports.getMyEdge = factory.getMyOne(Edge);
+exports.deleteMyEdge = factory.deleteMyOne(Edge);

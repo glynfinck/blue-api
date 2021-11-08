@@ -1,9 +1,23 @@
 const factory = require('./handlerFactory');
 const Graph = require('../models/graphModel');
 
-exports.getAllGraphs = factory.getAll(Graph);
-exports.createGraph = factory.createOne(Graph);
+// Admin Based Controllers
+exports.getAllGraphs = factory.getAll(Graph, {
+  nestedParams: { problem: 'problemId' },
+});
 
-exports.getGraph = factory.getOne(Graph, { path: 'nodes' }, { path: 'edges' });
-exports.updateGraph = factory.updateOne(Graph);
+exports.getGraph = factory.getOne(Graph, {
+  populateOptions: [{ path: 'nodes' }, { path: 'edges' }],
+});
 exports.deleteGraph = factory.deleteOne(Graph);
+
+// User Based Controllers
+exports.getAllMyGraphs = factory.getAllMy(Graph, {
+  nestedParams: { problem: 'problemId' },
+});
+exports.createMyGraph = factory.createMyOne(Graph);
+
+exports.getMyGraph = factory.getMyOne(Graph, {
+  populateOptions: [{ path: 'nodes' }, { path: 'edges' }],
+});
+exports.updateMyGraph = factory.updateMyOne(Graph);

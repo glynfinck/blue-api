@@ -2,39 +2,40 @@ const express = require('express');
 const nodeController = require('../controllers/nodeController');
 const authController = require('../controllers/authController');
 
-const router = express.Router({
-  mergeParams: true,
+// Admin Router
+const adminRouter = express.Router({
+  mergeParams: true
 });
 
-router
-  .route('/')
-  .get(
-    authController.protect,
-    authController.restrictTo('admin'),
-    nodeController.getAllNodes
-  )
-  .post(
-    authController.protect,
-    authController.restrictTo('admin'),
-    nodeController.createNode
-  );
+adminRouter.use(authController.protect);
+adminRouter.use(authController.restrictTo('admin'));
 
-router
+adminRouter.route('/').get(nodeController.getAllNodes);
+
+adminRouter
   .route('/:id')
-  .get(
-    authController.protect,
-    authController.restrictTo('admin'),
-    nodeController.getNode
-  )
-  .patch(
-    authController.protect,
-    authController.restrictTo('admin'),
-    nodeController.updateNode
-  )
-  .delete(
-    authController.protect,
-    authController.restrictTo('admin'),
-    nodeController.deleteNode
-  );
+  .get(nodeController.getNode)
+  .delete(nodeController.deleteNode);
 
-module.exports = router;
+exports.adminNodeRouter = adminRouter;
+
+// User Router
+const userRouter = express.Router({
+  mergeParams: true
+});
+
+userRouter.use(authController.protect);
+userRouter.use(authController.restrictTo('user'));
+
+userRouter
+  .route('/')
+  .get(nodeController.getAllMyNodes)
+  .post(nodeController.createMyNode);
+
+userRouter
+  .route('/:id')
+  .get(nodeController.getMyNode)
+  .patch(nodeController.updateMyNode)
+  .delete(nodeController.deleteMyNode);
+
+exports.userNodeRouter = userRouter;

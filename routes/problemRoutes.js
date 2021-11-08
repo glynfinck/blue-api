@@ -2,7 +2,16 @@ const express = require('express');
 const problemController = require('../controllers/problemController');
 const authController = require('../controllers/authController');
 
+const graphRoutes = require('./graphRoutes');
+const solutionRoutes = require('./solutionRoutes');
+
 const router = express.Router();
+
+router.use('/:problemId/graphs', graphRoutes.adminGraphRouter);
+router.use('/:problemId/solutions', solutionRoutes.adminSolutionRouter);
+
+router.use('/:problemId/me/graphs', graphRoutes.userGraphRouter);
+router.use('/:problemId/me/solutions', solutionRoutes.userSolutionRouter);
 
 router
   .route('/')

@@ -1,27 +1,25 @@
-const crypto = require('crypto');
-const { promisify } = require('util');
-const catchAsync = require('../utils/catchAsync');
-const AppError = require('../utils/appError');
-const UserData = require('../models/userDataModel');
-const https = require('https');
 const admin = require('firebase-admin');
 const client = require('firebase/app');
 const {
   getAuth,
   createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
+  signInWithEmailAndPassword
 } = require('firebase/auth');
+const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
+const UserData = require('../models/userDataModel');
 
+// eslint-disable-next-line node/no-unpublished-require
 const serviceAccount = require('../private/firebase-service-account.json');
 
 const firebaseClient = client.initializeApp({
-  apiKey: process.env.FIREBASE_API_KEY,
+  apiKey: process.env.FIREBASE_API_KEY
 });
 
 const auth = getAuth(firebaseClient);
 
 const firebaseAdmin = admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
+  credential: admin.credential.cert(serviceAccount)
 });
 
 exports.signUp = catchAsync(async (req, res, next) => {
@@ -38,6 +36,7 @@ exports.signUp = catchAsync(async (req, res, next) => {
     password
   );
   const { user } = firebaseResponse;
+  const { accessToken, refreshToken, expirationTime } = user.stsTokenManager;
 
   // 3) Create new user on mongodb
   try {
@@ -51,6 +50,9 @@ exports.signUp = catchAsync(async (req, res, next) => {
   res.status(201).json({
     status: 'success',
     token: user.accessToken,
+    accessToken,
+    refreshToken,
+    expirationTime
   });
 });
 
@@ -68,12 +70,13 @@ exports.signIn = catchAsync(async (req, res, next) => {
     password
   );
   const { user } = firebaseResponse;
+  const { accessToken, refreshToken, expirationTime } = user.stsTokenManager;
 
-  //console.log(user);
-
-  res.status(201).json({
+  res.status(200).json({
     status: 'success',
-    token: user.accessToken,
+    accessToken,
+    refreshToken,
+    expirationTime
   });
 });
 
@@ -105,11 +108,12 @@ exports.protect = catchAsync(async (req, res, next) => {
   // 4) Get corresponding mongodb user
   const mongoUser = await UserData.findOne({
     uid: firebaseUser.uid,
-    email: firebaseUser.email,
+    email: firebaseUser.email
   });
 
   // 5) Grant access to the protected route
   req.user = mongoUser;
+  // req.params.userId = user.uid;
   next();
 });
 
@@ -124,3 +128,18 @@ exports.restrictTo = (...roles) => {
     next();
   });
 };
+
+exports.filterByUser = (...unfilteredRoles) =>
+  catchAsync(async (req, res, next) => {
+    const filter = {};
+    /* 1) If the filterAuthUser is specififed to true then filter for the model
+            using the { user: req.user.uid }. Also only filter by user if admin the
+            user is NOT also an admin.
+    */
+    const currentUser = req.user;
+    if (!unfilteredRoles || !unfilteredRoles.includes(currentUser.role)) {
+      filter.user = req.user.uid;
+    }
+    req.filter = filter;
+    next();
+  });

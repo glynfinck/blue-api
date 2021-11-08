@@ -1,6 +1,4 @@
 const express = require('express');
-var jwt = require('express-jwt');
-var jwks = require('jwks-rsa');
 const morgan = require('morgan');
 const helmet = require('helmet');
 const hpp = require('hpp');
@@ -11,11 +9,11 @@ const rateLimit = require('express-rate-limit');
 const AppError = require('./utils/appError');
 const errorController = require('./controllers/errorController');
 
-const graphRouter = require('./routes/graphRoutes');
+const graphRoutes = require('./routes/graphRoutes');
 const problemRouter = require('./routes/problemRoutes');
-const solutionRouter = require('./routes/solutionRoutes');
-const nodeRouter = require('./routes/nodeRoutes');
-const edgeRouter = require('./routes/edgeRoutes');
+const solutionRoutes = require('./routes/solutionRoutes');
+const nodeRoutes = require('./routes/nodeRoutes');
+const edgeRoutes = require('./routes/edgeRoutes');
 const userRouter = require('./routes/userRoutes');
 
 const app = express();
@@ -35,7 +33,7 @@ const limiter = rateLimit({
   max: 100,
   windowMs: 60 * 60 * 1000,
   message:
-    'Too many requests from this IP address, please try again in an hour.',
+    'Too many requests from this IP address, please try again in an hour.'
 });
 app.use('/api', limiter);
 
@@ -57,17 +55,24 @@ app.use(
       'ratingsQuantity',
       'maxGroupSize',
       'difficulty',
-      'price',
-    ],
+      'price'
+    ]
   })
 );
 
-// Routes
-app.use('/api/v1/graphs', graphRouter);
+// Admin Routes
+app.use('/api/v1/graphs', graphRoutes.adminGraphRouter);
 app.use('/api/v1/problems', problemRouter);
-app.use('/api/v1/solutions', solutionRouter);
-app.use('/api/v1/nodes', nodeRouter);
-app.use('/api/v1/edges', edgeRouter);
+app.use('/api/v1/solutions', solutionRoutes.adminSolutionRouter);
+app.use('/api/v1/nodes', nodeRoutes.adminNodeRouter);
+app.use('/api/v1/edges', edgeRoutes.adminEdgeRouter);
+
+// User Routes
+app.use('/api/v1/me/graphs', graphRoutes.userGraphRouter);
+app.use('/api/v1/me/solutions', solutionRoutes.userSolutionRouter);
+app.use('/api/v1/me/nodes', nodeRoutes.userNodeRouter);
+app.use('/api/v1/me/edges', edgeRoutes.userEdgeRouter);
+
 app.use('/api/v1/users', userRouter);
 
 app.all('*', (req, res, next) => {

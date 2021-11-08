@@ -1,24 +1,53 @@
 const express = require('express');
 const authController = require('../controllers/authController');
 const graphController = require('../controllers/graphController');
+const nodeController = require('../controllers/nodeController');
+const edgeController = require('../controllers/edgeController');
 
-const nodeRouter = require('./nodeRoutes');
-const edgeRouter = require('./edgeRoutes');
+const nodeRoutes = require('./nodeRoutes');
+const edgeRoutes = require('./edgeRoutes');
 
-const router = express.Router();
+// Admin Router
+const adminRouter = express.Router({
+  mergeParams: true,
+});
 
-router.use('/:graphId/nodes', nodeRouter);
-router.use('/:graphId/edges', edgeRouter);
+adminRouter.use(authController.protect);
+adminRouter.use(authController.restrictTo('admin'));
 
-router
-  .route('/')
-  .get(authController.protect, graphController.getAllGraphs)
-  .post(authController.protect, graphController.createGraph);
+// TODO: implement admin nested routes
+adminRouter.use('/:graphId/nodes', nodeRoutes.adminNodeRouter);
+adminRouter.use('/:graphId/edges', edgeRoutes.adminEdgeRouter);
 
-router
+adminRouter.route('/').get(graphController.getAllGraphs);
+
+adminRouter
   .route('/:id')
-  .get(authController.protect, graphController.getGraph)
-  .patch(authController.protect, graphController.updateGraph)
-  .delete(authController.protect, graphController.deleteGraph);
+  .get(graphController.getGraph)
+  .delete(graphController.deleteGraph);
 
-module.exports = router;
+// User Router
+exports.adminGraphRouter = adminRouter;
+
+const userRouter = express.Router({
+  mergeParams: true,
+});
+
+userRouter.use(authController.protect);
+userRouter.use(authController.restrictTo('user'));
+
+// TODO: implement user graph routes and nested nodes/edges routes
+// userRouter.use('/nodes', userNodeRouter);
+// userRouter.use('/edges', userEdgeRouter);
+
+userRouter
+  .route('/')
+  .get(graphController.getAllMyGraphs)
+  .post(graphController.createMyGraph);
+
+userRouter
+  .route('/:id')
+  .get(graphController.getMyGraph)
+  .patch(graphController.updateMyGraph);
+
+exports.userGraphRouter = userRouter;

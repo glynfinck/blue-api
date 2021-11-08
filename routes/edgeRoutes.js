@@ -2,39 +2,39 @@ const express = require('express');
 const edgeController = require('../controllers/edgeController');
 const authController = require('../controllers/authController');
 
-const router = express.Router({
-  mergeParams: true,
+// Admin Router
+const adminRouter = express.Router({
+  mergeParams: true
 });
 
-router
-  .route('/')
-  .get(
-    authController.protect,
-    authController.restrictTo('admin'),
-    edgeController.getAllEdges
-  )
-  .post(
-    authController.protect,
-    authController.restrictTo('admin'),
-    edgeController.createEdge
-  );
+adminRouter.use(authController.protect);
+adminRouter.use(authController.restrictTo('admin'));
 
-router
+adminRouter.route('/').get(edgeController.getAllEdges);
+
+adminRouter
   .route('/:id')
-  .get(
-    authController.protect,
-    authController.restrictTo('admin'),
-    edgeController.getEdge
-  )
-  .patch(
-    authController.protect,
-    authController.restrictTo('admin'),
-    edgeController.updateEdge
-  )
-  .delete(
-    authController.protect,
-    authController.restrictTo('admin'),
-    edgeController.deleteEdge
-  );
+  .get(edgeController.getAllEdges)
+  .delete(edgeController.deleteEdge);
 
-module.exports = router;
+exports.adminEdgeRouter = adminRouter;
+
+// User Router
+const userRouter = express.Router({
+  mergeParams: true
+});
+
+userRouter.use(authController.protect);
+userRouter.use(authController.restrictTo('user'));
+
+userRouter
+  .route('/')
+  .get(edgeController.getAllMyEdges)
+  .post(edgeController.createMyEdge);
+
+userRouter
+  .route('/:id')
+  .get(edgeController.getMyEdge)
+  .delete(edgeController.deleteMyEdge);
+
+exports.userEdgeRouter = userRouter;
