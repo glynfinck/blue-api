@@ -1,39 +1,46 @@
 const mongoose = require('mongoose');
+const slugify = require('slugify');
 
 const problemSchema = new mongoose.Schema(
   {
     name: {
       type: String,
       required: true,
-      unique: true,
+      unique: true
     },
     description: {
       type: String,
-      required: true,
+      required: true
     },
     difficulty: {
       type: String,
       enum: ['easy', 'medium', 'hard'],
-      required: true,
+      required: true
     },
     solutionCode: {
       type: String,
-      required: true,
+      required: true
     },
     active: {
       type: Boolean,
-      default: true,
+      default: true
     },
     createdAt: {
       type: Date,
-      default: Date.now(),
+      default: Date.now()
     },
+    slug: { type: String, unique: true }
   },
   {
     toJSON: { virtuals: true },
-    toObject: { virtuals: true },
+    toObject: { virtuals: true }
   }
 );
+
+problemSchema.pre('save', function(next) {
+  this.slug = slugify(this.name, { lower: true });
+  next();
+});
 
 const Problem = mongoose.model('Problem', problemSchema);
 
