@@ -59,7 +59,7 @@ exports.updateOne = Model =>
     });
 
     // 3) Error Handle and Send Response
-    utils.sendOneFound(Model, res, doc);
+    utils.sendOneFound(Model, res, next, doc);
   });
 
 exports.deleteOne = Model =>
