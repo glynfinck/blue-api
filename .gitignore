@@ -3,3 +3,6 @@ node_modules
 
 # ignore private files
 private
+
+# ignore dev-data
+dev-data
